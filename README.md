@@ -169,3 +169,71 @@ The core customer service workflow and manual resolution tracking have been demo
 ---
 
 *Developed as a practical AI automation project using n8n, OpenAI, Google Workspace, and GitHub.*
+
+## Installation and Setup
+
+### Prerequisites
+
+Before importing SmartBuy-AI, ensure you have:
+
+- An n8n Cloud account or a self-hosted n8n installation.
+- Access to an OpenAI chat model supported by your n8n environment.
+- A Google account with Google Sheets access.
+- A Gmail account for human follow-up notifications.
+
+### Importing the Workflow
+
+1. Download `SmartBuy-AI-Workflow-Public.json` from this repository.
+2. Sign in to your n8n account.
+3. Create a new workflow.
+4. Open the workflow menu and select **Import from File**.
+5. Select the downloaded JSON file.
+6. Confirm that the workflow nodes appear in the n8n editor.
+
+### Configuring the Integrations
+
+**OpenAI**
+
+Configure the OpenAI Chat Model nodes using a supported model and the appropriate credentials or managed connection.
+
+**Google Sheets**
+
+1. Create a Google spreadsheet for customer enquiry logging.
+2. Add the following column headings:
+
+   `Timestamp | Session_ID | Customer_Message | AI_Response | Intent | Status | Resolved_At | Resolved_By`
+
+3. Connect your Google Sheets account in n8n.
+4. Update the **Append row in sheet** node to reference your spreadsheet and worksheet.
+5. Verify the column mappings.
+
+**Gmail**
+
+1. Connect your Gmail account in n8n.
+2. Open the **Send a message** node.
+3. Replace the placeholder recipient with your authorized human support email address.
+4. Test the notification using a sample customer complaint.
+
+### Testing
+
+Send sample customer messages covering price enquiries, product availability, orders, delivery questions, complaints, and general enquiries.
+
+Confirm that:
+
+- The AI responds appropriately.
+- Enquiries are classified correctly.
+- Customer interactions are recorded in Google Sheets.
+- Enquiries requiring human attention are marked `Pending Human Follow-up`.
+- Escalation emails are sent to the configured recipient.
+
+### Resolution Tracking
+
+The Google Apps Script resolution tracker is a separate component and is not included in the n8n workflow JSON.
+
+It must be configured separately to record resolution timestamps when an authorized user manually changes a customer enquiry's status to `Resolved`.
+
+### Security Notes
+
+Do not commit API keys, OAuth tokens, customer information, or private spreadsheet configuration to a public repository.
+
+Use your own credentials and verify all integration settings before activating the workflow.
