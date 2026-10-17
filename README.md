@@ -236,4 +236,53 @@ It must be configured separately to record resolution timestamps when an authori
 
 Do not commit API keys, OAuth tokens, customer information, or private spreadsheet configuration to a public repository.
 
+## Google Apps Script Resolution Tracker
+
+SmartBuy-AI V1 includes a Google Apps Script that automatically records resolution timestamps when support agents manually update customer enquiry statuses.
+
+### Installation
+
+1. Open the Google spreadsheet connected to SmartBuy-AI.
+2. Select **Extensions → Apps Script**.
+3. Open the `Code.gs` file.
+4. Copy the code from `SmartBuy-AI-Resolution-Tracker.gs` in this repository.
+5. Paste the code into the Apps Script editor.
+6. Save the project.
+7. Confirm that the spreadsheet worksheet is named `Sheet1`, or update the script to match your worksheet name.
+8. Set the Apps Script project time zone to `Africa/Lagos` if operating in Lagos, Nigeria.
+
+The `onEdit(e)` function is a simple trigger that runs automatically when a user manually edits the spreadsheet. No additional trigger installation is required for this use case.
+
+### Required Spreadsheet Columns
+
+| Column | Field | Purpose |
+|---|---|---|
+| F | Status | Tracks the enquiry status |
+| G | Resolved_At | Records the resolution timestamp |
+| H | Resolved_By | Stores the support agent's name |
+
+### How It Works
+
+When a support agent manually changes the Status field to `Resolved`, the script automatically enters the current date and time in the `Resolved_At` column.
+
+The agent enters their name manually in the `Resolved_By` column.
+
+If the Status field is changed to another value, the script clears both resolution fields.
+
+### Testing
+
+1. Create or select a test customer enquiry.
+2. Change its Status in column F to `Resolved`.
+3. Confirm that column G receives a timestamp.
+4. Enter a test agent name in column H.
+5. Change the Status back to `Pending Human Follow-up`.
+6. Confirm that columns G and H are cleared.
+
+### Important Limitations
+
+- The script responds to manual spreadsheet edits, not updates made through the Google Sheets API.
+- Agent names are entered manually.
+- Editing a status cell already set to `Resolved` can overwrite the previous resolution timestamp.
+- The script handles single-cell edits in column F only.
+
 Use your own credentials and verify all integration settings before activating the workflow.
