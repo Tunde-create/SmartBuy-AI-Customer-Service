@@ -1,0 +1,697 @@
+{
+  "name": "SmartBuy-AI Customer Service V1 -Google Sheets Logging",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -96,
+        112
+      ],
+      "id": "7801c849-a4dd-481b-895b-b2a01c0294b5",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are SmartBuy Lagos AI Customer Service Assistant.\n\nYou work for SmartBuy Lagos, a retail electronics shop in Lagos, Nigeria.\n\nPRODUCT CATALOGUE (TEST DATA):\n1. Samsung Galaxy A15 - ₦185,000 - In Stock\n2. Oraimo Power Bank 20000mAh - ₦22,000 - In Stock\n3. Bluetooth Speaker - ₦35,000 - Out of Stock\n\nYOUR RESPONSIBILITIES:\n- Welcome customers politely.\n- Answer questions about product prices.\n- Check product availability using the catalogue.\n- Help customers who want to place orders.\n- Refer unknown questions to a human sales agent.\n\nIMPORTANT RULES:\n- Never invent prices or stock information.\n- Only use the catalogue provided.\n- Do not claim orders or payments are confirmed.\n- Keep replies short, friendly and professional.\n- Respond in English unless the customer requests another language."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        128,
+        112
+      ],
+      "id": "ef70483a-2c1f-43ad-9953-8e1737e18df6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        352
+      ],
+      "id": "63fffd8a-5dfb-43d5-8cb1-656b6f78b0d1",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_SPREADSHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Your Customer Chat History"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.setZone('Africa/Lagos').toFormat('dd/MM/yyyy HH:mm') }}",
+            "Session_ID": "={{ $('When chat message received').item.json.sessionId }}",
+            "Customer_Message": "={{ $('When chat message received').item.json.chatInput }}",
+            "AI_Response": "={{ $('AI Agent').item.json.output }}",
+            "Intent": "={{ $json.Intent }}",
+            "Status": "={{ $json.Status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer_Message",
+              "displayName": "Customer_Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI_Response",
+              "displayName": "AI_Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1056,
+        112
+      ],
+      "id": "a81fed00-0233-47fc-b02f-03060b3f0e46",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('When chat message received').item.json.chatInput }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Price Enquiry",
+              "description": "Customer asks about prices or discounts"
+            },
+            {
+              "category": "Product Enquiry",
+              "description": "Customer asks about products, features or availability"
+            },
+            {
+              "category": "Order Placement",
+              "description": "Customer wants to purchase or place an order"
+            },
+            {
+              "category": "Delivery Enquiry",
+              "description": "Customer asks about shipping, delivery or pickup"
+            },
+            {
+              "category": "Complaint",
+              "description": "Customer reports a problem or dissatisfaction"
+            },
+            {
+              "category": "General Enquiry",
+              "description": "Other questions not covered above"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        112
+      ],
+      "id": "f35817c4-055f-4034-aba2-60c073a4f542",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        480
+      ],
+      "id": "823dcb30-618e-4fdd-bcd0-29c0c9cad3b8",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "Price Enquiry",
+              "type": "string"
+            },
+            {
+              "id": "30e6f46e-be43-4478-b164-fec6582063ff",
+              "name": "Status",
+              "value": "Answered",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        -368
+      ],
+      "id": "df722e5e-aa33-49c9-983b-4a6ace916cd6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "Product Enquiry",
+              "type": "string"
+            },
+            {
+              "id": "4d62f593-3a55-4297-a88d-b4bc1c78d882",
+              "name": "Status",
+              "value": "={{ /human (sales |support )?agent|human support|sales team|support team|connect you to a human|confirm availability|not in (our |the )?catalogue|don.t have|unable to confirm|cannot confirm|need to check/i.test($('AI Agent').item.json.output || '') ? 'Pending Human Follow-up' : 'Answered' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        -176
+      ],
+      "id": "1bb03e54-e627-4a26-9d14-4749acc52afd",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "Order Placement",
+              "type": "string"
+            },
+            {
+              "id": "292031ce-fb72-49c9-973f-d36094f3d0a9",
+              "name": "Status",
+              "value": "Pending Human Follow-up",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        16
+      ],
+      "id": "ca293800-9860-4865-a261-63651913fec6",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "Delivery Enquiry",
+              "type": "string"
+            },
+            {
+              "id": "b994622e-bbd5-4adb-86f5-4a157618127d",
+              "name": "Status",
+              "value": "Pending Human Follow-up",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        208
+      ],
+      "id": "2d591536-4be4-45bb-bfbf-e97ac3af723d",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "Complaint",
+              "type": "string"
+            },
+            {
+              "id": "6fa8bfe8-ec10-4042-8007-a554c1d361bf",
+              "name": "Status",
+              "value": "Pending Human Follow-up",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        400
+      ],
+      "id": "9a4fcb6d-87bf-4f3a-a8f9-5a1af481a29b",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31566890-a34e-40b3-a1be-d243b2405fa7",
+              "name": "Intent",
+              "value": "General Enquiry",
+              "type": "string"
+            },
+            {
+              "id": "549f3a36-92e0-4080-b97f-8f3cfcda0507",
+              "name": "Status",
+              "value": "Answered",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        592
+      ],
+      "id": "2784a560-97ce-426c-8fd6-5b097c63736c",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79a4cc0b-1bfc-4d0e-9f38-6d39b147fcfa",
+              "name": "output",
+              "value": "={{ $('AI Agent').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1280,
+        112
+      ],
+      "id": "d6dda5b7-4170-4ae9-bc3d-c88860b73b43",
+      "name": "Edit Fields6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcccbab4-b786-4596-9399-ee6d673bda7b",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Pending Human Follow-up",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1280,
+        288
+      ],
+      "id": "7178c5cf-d0df-4ef7-8000-50b261685fd5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "your-support-email@example.com",
+        "subject": "={{ 'SmartBuy-AI | Human Follow-up Required | ' + $json.Intent }}",
+        "emailType": "text",
+        "message": "={{\n`SMARTBUY-AI — HUMAN FOLLOW-UP NOTIFICATION\n\nA customer enquiry requires human attention.\n\nDate/Time: ${$json.Timestamp}\nSession ID: ${$json.Session_ID}\nEnquiry Category: ${$json.Intent}\nStatus: ${$json.Status}\n\nCUSTOMER MESSAGE:\n${$json.Customer_Message}\n\nAI RESPONSE:\n${$json.AI_Response}\n\nACTION REQUIRED:\nPlease review this enquiry and contact the customer through an approved channel where contact details are available.\n\nThis is an automated notification from SmartBuy-AI V1.\n` \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        192
+      ],
+      "id": "1dbae7b6-b1f5-4432-97fb-d2957e19b025",
+      "name": "Send a message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8971a919-235b-4dd0-baa2-5d7948605db6",
+              "name": "output",
+              "value": "={{ $('AI Agent').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1888,
+        192
+      ],
+      "id": "601c3216-fca8-414f-a82f-1589681d0612",
+      "name": "Edit Fields7"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
