@@ -39,6 +39,8 @@ Its objective is to reduce repetitive customer service tasks while ensuring that
 
 ## 4. Workflow Architecture
 
+![SmartBuy-AI Customer Service Workflow](SmartBuy-AI-Workflow.png)
+
 The SmartBuy-AI workflow includes the following major stages:
 
 1. Customer submits a message through the n8n chat interface.
